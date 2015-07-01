@@ -1,1 +1,3201 @@
-/home/wking/Private/azure/api-spec/public.json
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Azure Standard Public API",
+    "description": "The public API behind Azure's website",
+    "contact": {
+      "name": "Azure Standard Customer Service",
+      "email": "info@azurestandard.com",
+      "url": "https://azurestandard.com/customer-service"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "http://opensource.org/licenses/MIT"
+    }
+  },
+  "security": [
+    {
+      "basic": []
+    },
+    {
+      "sessionCookie": []
+    }
+  ],
+  "securityDefinitions": {
+    "basic": {
+      "type": "basic",
+      "description": "Basic authentication (http://tools.ietf.org/html/rfc2617#section-2)"
+    },
+    "sessionCookie": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "cookie",
+      "description": "Session cookie (http://tools.ietf.org/html/rfc6265)"
+    }
+  },
+  "host": "api.azurestandard.com",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/drops": {
+      "get": {
+        "summary": "Returns all drops from the system that the user has access to",
+        "operationId": "findDrops",
+        "tags": [
+          "drop"
+        ],
+        "parameters": [
+          {
+            "name": "active",
+            "in": "query",
+            "description": "only return (in)active drops",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "route",
+            "in": "query",
+            "description": "route names to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "trip",
+            "in": "query",
+            "description": "trip IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "filter-person",
+            "in": "query",
+            "description": "person IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "maximum number of results to return",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "offset to the first result to return.  Use negative numbers to offset from the end of the result list.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "drop response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/drop"
+              }
+            },
+            "headers": {
+              "Count": {
+                "description": "total number of matching results (how many you'd get if you didn't set `limit`)",
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new drop",
+        "operationId": "addDrop",
+        "tags": [
+          "drop"
+        ],
+        "parameters": [
+          {
+            "name": "drop",
+            "in": "body",
+            "description": "Drop to add",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/newDrop"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "drop response",
+            "schema": {
+              "$ref": "#/definitions/drop"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/drop/{id}": {
+      "get": {
+        "summary": "Returns a drop based on a single ID, if the user has access to the drop",
+        "operationId": "findDropById",
+        "tags": [
+          "drop"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of drop to fetch",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "drop response",
+            "schema": {
+              "$ref": "#/definitions/drop"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update an existing drop",
+        "operationId": "updateDrop",
+        "tags": [
+          "drop"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of drop to update",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "drop",
+            "in": "body",
+            "description": "Updated drop parameters (can optionally include 'id')",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/drop"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "drop response",
+            "schema": {
+              "$ref": "#/definitions/drop"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an existing drop",
+        "operationId": "deleteDrop",
+        "tags": [
+          "drop"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of drop to delete",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "delete successful"
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/drops/locations": {
+      "get": {
+        "summary": "Returns an array of locations for all active drops that the user has access to.",
+        "description": "For example, you can use this to draw markers on map.",
+        "operationId": "findDropLocations",
+        "tags": [
+          "drop"
+        ],
+        "responses": {
+          "200": {
+            "description": "drop locations response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/location"
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/routes": {
+      "get": {
+        "summary": "Returns all routes from the system that the user has access to",
+        "operationId": "findRoutes",
+        "tags": [
+          "route"
+        ],
+        "parameters": [
+          {
+            "name": "drop",
+            "in": "query",
+            "description": "drop IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "maximum number of results to return",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "offset to the first result to return.  Use negative numbers to offset from the end of the result list.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "route response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/route"
+              }
+            },
+            "headers": {
+              "Count": {
+                "description": "total number of matching results (how many you'd get if you didn't set `limit`)",
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new route",
+        "operationId": "addRoute",
+        "tags": [
+          "route"
+        ],
+        "parameters": [
+          {
+            "name": "route",
+            "in": "body",
+            "description": "Route to add",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/newRoute"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "route response",
+            "schema": {
+              "$ref": "#/definitions/route"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/route/{name}": {
+      "get": {
+        "summary": "Returns a route based on a single ID, if the user has access to the route",
+        "operationId": "findRouteById",
+        "tags": [
+          "route"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "name of route to fetch",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "route response",
+            "schema": {
+              "$ref": "#/definitions/route"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update an existing route",
+        "operationId": "updateRoute",
+        "tags": [
+          "route"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "name of route to update",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "route",
+            "in": "body",
+            "description": "Updated route parameters (can optionally include 'name')",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/route"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "route response",
+            "schema": {
+              "$ref": "#/definitions/route"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an existing route",
+        "operationId": "deleteRoute",
+        "tags": [
+          "route"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "description": "name of route to delete",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "delete successful"
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/trips": {
+      "get": {
+        "summary": "Returns all trips from the system that the user has access to",
+        "description": "Trips are ordered for decreasing cutoff time",
+        "operationId": "findTrips",
+        "tags": [
+          "trip"
+        ],
+        "parameters": [
+          {
+            "name": "route",
+            "in": "query",
+            "description": "route names to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "drop",
+            "in": "query",
+            "description": "drop IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "stop",
+            "in": "query",
+            "description": "stop IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "cutoff-after",
+            "in": "query",
+            "description": "only return trips with cutoffs after or on this date",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "cutoff-before",
+            "in": "query",
+            "description": "only return trips with cutoffs before this date",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "maximum number of results to return",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "offset to the first result to return.  Use negative numbers to offset from the end of the result list.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "trip response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/trip"
+              }
+            },
+            "headers": {
+              "Count": {
+                "description": "total number of matching results (how many you'd get if you didn't set `limit`)",
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/trip/{id}": {
+      "get": {
+        "summary": "Returns a trip based on a single ID, if the user has access to the trip",
+        "operationId": "findTripById",
+        "tags": [
+          "trip"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of trip to fetch",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "trip response",
+            "schema": {
+              "$ref": "#/definitions/trip"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/route-stops": {
+      "get": {
+        "summary": "Returns all route-stops from the system that the user has access to",
+        "description": "Route-stops are ordered for increasing offset from the route's trip cutoff",
+        "operationId": "findRouteStops",
+        "tags": [
+          "stop"
+        ],
+        "parameters": [
+          {
+            "name": "route",
+            "in": "query",
+            "description": "route names to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "drop",
+            "in": "query",
+            "description": "drop IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "maximum number of results to return",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "offset to the first result to return.  Use negative numbers to offset from the end of the result list.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "route-stop response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/routeStop"
+              }
+            },
+            "headers": {
+              "Count": {
+                "description": "total number of matching results (how many you'd get if you didn't set `limit`)",
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/route-stop/{id}": {
+      "get": {
+        "summary": "Returns a route-stop based on a single ID, if the user has access to the route-stop",
+        "operationId": "findRouteStopById",
+        "tags": [
+          "stop"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of route-stop to fetch",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "route-stop response",
+            "schema": {
+              "$ref": "#/definitions/routeStop"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/stops": {
+      "get": {
+        "summary": "Returns all stops from the system that the user has access to",
+        "description": "Stops are ordered for decreasing cutoff time",
+        "operationId": "findStops",
+        "tags": [
+          "stop"
+        ],
+        "parameters": [
+          {
+            "name": "route",
+            "in": "query",
+            "description": "route names to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "trip",
+            "in": "query",
+            "description": "trip IDs names to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "drop",
+            "in": "query",
+            "description": "drop IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "target-time-after",
+            "in": "query",
+            "description": "only return stops with a target time after or on this date",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "target-time-before",
+            "in": "query",
+            "description": "only return stops with a target time before this date",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "maximum number of results to return",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "offset to the first result to return.  Use negative numbers to offset from the end of the result list.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "stop response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/stop"
+              }
+            },
+            "headers": {
+              "Count": {
+                "description": "total number of matching results (how many you'd get if you didn't set `limit`)",
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/stop/{id}": {
+      "get": {
+        "summary": "Returns a stop based on a single ID, if the user has access to the stop",
+        "operationId": "findStopById",
+        "tags": [
+          "stop"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of stop to fetch",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "stop response",
+            "schema": {
+              "$ref": "#/definitions/stop"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "summary": "Returns all products from the system that the user has access to",
+        "operationId": "findProducts",
+        "tags": [
+          "product"
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "search string for filtering products.  The logic behind this is left up to the implementation, but it should at least match words in the product name, and may optionally match the product description or other characteristics",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "brand",
+            "in": "query",
+            "description": "brand IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "category IDs to filter by (for products directly associated with the categories)",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "ancestor-category",
+            "in": "query",
+            "description": "category IDs to filter by (for products associated with the categories or their descendants)",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "packaged-product",
+            "in": "query",
+            "description": "packaged product codes to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "description": "tags to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/packagedProductTag"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "filter-person",
+            "in": "query",
+            "description": "person IDs to filter by (selects their favorite products)",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "annotate-person",
+            "in": "query",
+            "description": "person ID for associating additional metadata with results (e.g. whether this person has favorited a given packaged-product).  If unset and you're authenticated, defaults to your authenticated ID",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "maximum number of results to return",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "offset to the first result to return.  Use negative numbers to offset from the end of the result list.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "product response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/product"
+              }
+            },
+            "headers": {
+              "Count": {
+                "description": "total number of matching results (how many you'd get if you didn't set `limit`)",
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/product/{id}": {
+      "get": {
+        "summary": "Returns a product based on a single ID, if the user has access to the product",
+        "operationId": "findProductById",
+        "tags": [
+          "product"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of product to fetch",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "product response",
+            "schema": {
+              "$ref": "#/definitions/product"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/packaged-products": {
+      "get": {
+        "summary": "Returns all packaged products from the system that the user has access to",
+        "operationId": "findPackagedProduct",
+        "tags": [
+          "product"
+        ],
+        "parameters": [
+          {
+            "name": "product",
+            "in": "query",
+            "description": "product IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "brand",
+            "in": "query",
+            "description": "brand IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "category IDs to filter by (for products directly associated with the categories)",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "ancestor-category",
+            "in": "query",
+            "description": "category IDs to filter by (for packaged products associated with the categories or their descendants)",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "tag",
+            "in": "query",
+            "description": "tags to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/packagedProductTag"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "filter-person",
+            "in": "query",
+            "description": "person IDs to filter by (selects their favorite packaged products)",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "annotate-person",
+            "in": "query",
+            "description": "person ID for associating additional metadata with results (e.g. whether this person has favorited a given packaged-product).  If unset and you're authenticated, defaults to your authenticated ID",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "maximum number of results to return",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "offset to the first result to return.  Use negative numbers to offset from the end of the result list.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "packaged product response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/packagedProduct"
+              }
+            },
+            "headers": {
+              "Count": {
+                "description": "total number of matching results (how many you'd get if you didn't set `limit`)",
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/packaged-product/{code}": {
+      "get": {
+        "summary": "Returns a packaged product based on a single ID, if the user has access to the packaged product",
+        "operationId": "findPackagedProductById",
+        "tags": [
+          "product"
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "description": "code of the packaged product to fetch",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "product response",
+            "schema": {
+              "$ref": "#/definitions/packagedProduct"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/categories": {
+      "get": {
+        "summary": "Returns all categories from the system",
+        "operationId": "findCategories",
+        "tags": [
+          "category"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "parent",
+            "in": "query",
+            "description": "category IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "product",
+            "in": "query",
+            "description": "product IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "packaged-product",
+            "in": "query",
+            "description": "packaged product codes to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "maximum number of results to return",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "offset to the first result to return.  Use negative numbers to offset from the end of the result list.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "category response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/category"
+              }
+            },
+            "headers": {
+              "Count": {
+                "description": "total number of matching results (how many you'd get if you didn't set `limit`)",
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/category/{id}": {
+      "get": {
+        "summary": "Returns a category based on a single ID",
+        "operationId": "findCategoryById",
+        "tags": [
+          "category"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of category to fetch",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "category response",
+            "schema": {
+              "$ref": "#/definitions/category"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/orders": {
+      "get": {
+        "summary": "Returns all orders from the system that the user has access to",
+        "operationId": "findOrders",
+        "tags": [
+          "order"
+        ],
+        "parameters": [
+          {
+            "name": "drop",
+            "in": "query",
+            "description": "drop IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "trip",
+            "in": "query",
+            "description": "trip IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "product",
+            "in": "query",
+            "description": "product IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "packaged-product",
+            "in": "query",
+            "description": "packaged product codes to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "filter-person",
+            "in": "query",
+            "description": "person IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "order-status string to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "cart",
+                "placed",
+                "shipped",
+                "lost"
+              ]
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "maximum number of results to return",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "offset to the first result to return.  Use negative numbers to offset from the end of the result list.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "order response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/order"
+              }
+            },
+            "headers": {
+              "Count": {
+                "description": "total number of matching results (how many you'd get if you didn't set `limit`)",
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/order/{id}": {
+      "get": {
+        "summary": "Returns a order based on a single ID",
+        "operationId": "findOrderById",
+        "tags": [
+          "order"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of order to fetch",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "order response",
+            "schema": {
+              "$ref": "#/definitions/order"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/order-lines": {
+      "get": {
+        "summary": "Returns all order-lines from the system that the user has access to",
+        "operationId": "findOrderLines",
+        "tags": [
+          "order-line"
+        ],
+        "parameters": [
+          {
+            "name": "order",
+            "in": "query",
+            "description": "order IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "product",
+            "in": "query",
+            "description": "product IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "packaged-product",
+            "in": "query",
+            "description": "packaged product codes to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "maximum number of results to return",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "offset to the first result to return.  Use negative numbers to offset from the end of the result list.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "order-line response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/orderLine"
+              }
+            },
+            "headers": {
+              "Count": {
+                "description": "total number of matching results (how many you'd get if you didn't set `limit`)",
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/order-line/{id}": {
+      "get": {
+        "summary": "Returns a order-line based on a single ID",
+        "operationId": "findOrderLineById",
+        "tags": [
+          "order-line"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of order-line to fetch",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "order-line response",
+            "schema": {
+              "$ref": "#/definitions/orderLine"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/account-entries": {
+      "get": {
+        "summary": "Returns all credits and debits from the system that the user has access to",
+        "operationId": "findAccountEntries",
+        "tags": [
+          "account"
+        ],
+        "parameters": [
+          {
+            "name": "filter-person",
+            "in": "query",
+            "description": "person IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "date-after",
+            "in": "query",
+            "description": "only return entries with dates after this date (inclusive)",
+            "required": false,
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "name": "date-before",
+            "in": "query",
+            "description": "only return entries with dates before this date (exclusive)",
+            "required": false,
+            "type": "string",
+            "format": "date"
+          },
+          {
+            "name": "balance",
+            "in": "query",
+            "description": "add the balance field to returned entries",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "maximum number of results to return",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "offset to the first result to return.  Use negative numbers to offset from the end of the result list.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "account entry response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/accountEntry"
+              }
+            },
+            "headers": {
+              "Count": {
+                "description": "total number of matching results (how many you'd get if you didn't set `limit`)",
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/account-entry/{id}": {
+      "get": {
+        "summary": "Returns a credit or debit based on a single ID",
+        "operationId": "findAccountEntryById",
+        "tags": [
+          "account"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of account entry to fetch",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "account entry response",
+            "schema": {
+              "$ref": "#/definitions/accountEntry"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/payment-methods": {
+      "get": {
+        "summary": "Returns all payment methods from the system that the user has access to",
+        "description": "Methods associated with a person are ordered by decreasing preference.  The ordering between methods associated with different people is undefined.",
+        "operationId": "findPayments",
+        "tags": [
+          "payment"
+        ],
+        "parameters": [
+          {
+            "name": "filter-person",
+            "in": "query",
+            "description": "person IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "maximum number of results to return",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "offset to the first result to return.  Use negative numbers to offset from the end of the result list.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "payment method response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/paymentMethod"
+              }
+            },
+            "headers": {
+              "Count": {
+                "description": "total number of matching results (how many you'd get if you didn't set `limit`)",
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new payment method",
+        "operationId": "addPaymentMethod",
+        "tags": [
+          "payment"
+        ],
+        "parameters": [
+          {
+            "name": "payment-method",
+            "in": "body",
+            "description": "Payment method to add",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/newPaymentMethod"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "payment method response",
+            "schema": {
+              "$ref": "#/definitions/paymentMethod"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/payment-method/{id}": {
+      "get": {
+        "summary": "Returns a payment method based on a single ID",
+        "operationId": "findPaymentMethodById",
+        "tags": [
+          "payment"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of payment method to fetch",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment method response",
+            "schema": {
+              "$ref": "#/definitions/paymentMethod"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/addresses": {
+      "get": {
+        "summary": "Returns all addresses from the system that the user has access to",
+        "description": "Addresses associated with a person are ordered by decreasing preference.  The ordering between addresses associated with different people is undefined.",
+        "operationId": "findAddresses",
+        "tags": [
+          "address"
+        ],
+        "parameters": [
+          {
+            "name": "filter-person",
+            "in": "query",
+            "description": "person IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "maximum number of results to return",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "offset to the first result to return.  Use negative numbers to offset from the end of the result list.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "address response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/address"
+              }
+            },
+            "headers": {
+              "Count": {
+                "description": "total number of matching results (how many you'd get if you didn't set `limit`)",
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/address/{id}": {
+      "get": {
+        "summary": "Returns a address based on a single ID",
+        "operationId": "findAddressById",
+        "tags": [
+          "address"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of address to fetch",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "address response",
+            "schema": {
+              "$ref": "#/definitions/address"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/people": {
+      "get": {
+        "summary": "Returns all people from the system that the user has access to",
+        "operationId": "findPeople",
+        "tags": [
+          "person"
+        ],
+        "parameters": [
+          {
+            "name": "drop",
+            "in": "query",
+            "description": "drop IDs to filter by",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "collectionFormat": "csv"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "maximum number of results to return",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "description": "offset to the first result to return.  Use negative numbers to offset from the end of the result list.",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "person response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/person"
+              }
+            },
+            "headers": {
+              "Count": {
+                "description": "total number of matching results (how many you'd get if you didn't set `limit`)",
+                "type": "integer",
+                "format": "int32",
+                "minimum": 0
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/person/{id}": {
+      "get": {
+        "summary": "Returns a person based on a single ID, if the user has access to the person",
+        "operationId": "findPersonById",
+        "tags": [
+          "person"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of person to fetch",
+            "required": true,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "person response",
+            "schema": {
+              "$ref": "#/definitions/person"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/person": {
+      "get": {
+        "summary": "Returns the authenticated person (yourself)",
+        "operationId": "findPersonByAuth",
+        "tags": [
+          "person"
+        ],
+        "responses": {
+          "200": {
+            "description": "person response",
+            "schema": {
+              "$ref": "#/definitions/person"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/session": {
+      "get": {
+        "summary": "Returns information about the current cookie-based session",
+        "operationId": "findSessionByAuth",
+        "tags": [
+          "session"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "session response",
+            "schema": {
+              "$ref": "#/definitions/session"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "get": {
+        "summary": "Authenticate and receive a session cookie",
+        "operationId": "login",
+        "tags": [
+          "session"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "body",
+            "description": "Username for authorization.  Instead of your username, you could also use one of your associated email addresses or your person ID here",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "in": "body",
+            "description": "Password for authorization",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "session response",
+            "schema": {
+              "$ref": "#/definitions/session"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "get": {
+        "summary": "Clears the current cookie-based session",
+        "operationId": "logout",
+        "tags": [
+          "session"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "session response",
+            "schema": {
+              "$ref": "#/definitions/session"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/registration/register": {
+      "post": {
+        "summary": "Register a new person",
+        "description": "The API implementation will by sending the registrant a confirmation email.  That email will contain a confirmation URL with a registration token.  Following that URL will (possibly indirectly) send the token to this API's confirmation endpoint which completes the registration.  Since customers are unlikely to enjoy hitting the JSON confirmation endpoint directly, we recommend clients set base-url to something like `http://example.com/activation?token=` and have that page send a request to this API's confirmation endpoint and display the result returned by the API.  On success, this endpoint will also return a resend token (not the same as the confirmation token emailed to the registrant), which can be used by the client to trigger confirmation email resends.",
+        "operationsId": "registerPerson",
+        "tags": [
+          "registration"
+        ],
+        "parameters": [
+          {
+            "name": "base-url",
+            "in": "body",
+            "description": "Redirect URL for the confirmation UI.  The confirmation email points customers at {base-url}{confirmation-token} to confirm their registration.",
+            "description": "The registrant's email address",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "in": "body",
+            "description": "The registrant's full name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "in": "body",
+            "description": "The registrant's password",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "in": "body",
+            "description": "The registrant's email address",
+            "required": true,
+            "type": "string",
+            "format": "email"
+          },
+          {
+            "name": "can-email",
+            "in": "body",
+            "description": "Set to false if you do not wish to be contacted via email after completing registration (assumed true)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "address",
+            "in": "body",
+            "description": "The registrant's mailing address (required if the've set 'catalog' or unset 'can-email')",
+            "required": false,
+            "type": "object",
+            "schema": {
+              "$ref": "#/definitions/address"
+            }
+          },
+          {
+            "name": "telephone",
+            "in": "body",
+            "description": "The registrant's telephone numbers (currently only supports 'voice' and 'text' types)",
+            "required": false,
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/telephone"
+            }
+          },
+          {
+            "name": "drop",
+            "in": "body",
+            "description": "The registrant's chosen drop ID (if any)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "catalog",
+            "in": "body",
+            "description": "Set to true to receive the product catalog",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "resend token (registration successfully initiated and confirmation email sent)",
+            "type": "string"
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/registration/confirm": {
+      "post": {
+        "summary": "Complete an in-progress registration",
+        "operationId": "confirmRegistration",
+        "tags": [
+          "registration"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "body",
+            "description": "The registrant's confirmation token",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "person response",
+            "schema": {
+              "$ref": "#/definitions/person"
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    },
+    "/registration/resend": {
+      "post": {
+        "summary": "Resend the confirmation email to the user",
+        "operationId": "resendRegistrationEmail",
+        "tags": [
+          "registration"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "body",
+            "description": "The new person's resend token",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "base-url",
+            "in": "body",
+            "description": "Redirect URL for the confirmation UI.  The confirmation email points customers at {base-url}{confirmation-token} to confirm their registration.",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Confirmation email resent",
+            "schema": {}
+          },
+          "default": {
+            "description": "unexpected error",
+            "schema": {
+              "$ref": "#/definitions/errorModel"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "drop": {
+      "description": "an order-delivery location",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "coordinators": {
+          "description": "coordinators for this drop.  The first entry is the primary contact",
+          "type": "array",
+          "items": {
+            "description": "person ID for this coordinator",
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "address": {
+          "$ref": "#/definitions/address"
+        },
+        "geo": {
+          "$ref": "#/definitions/geo"
+        },
+        "active": {
+          "description": "whether or not this drop is actively ordering",
+          "type": "boolean"
+        },
+        "exclusivity": {
+          "type": "string",
+          "enum": [
+            "open",
+            "semi-open",
+            "closed"
+          ]
+        },
+        "parking": {
+          "description": "parking location ownership for this drop",
+          "type": "string",
+          "enum": [
+            null,
+            "home",
+            "business",
+            "non-profit",
+            "public"
+          ]
+        },
+        "storage": {
+          "description": "storage facilities available at this drop",
+          "type": "array",
+          "items": {
+            "description": "facility name",
+            "type": "string",
+            "enum": [
+              "dry",
+              "refregerator",
+              "freezer"
+            ]
+          }
+        },
+        "accept-cash-on-delivery": {
+          "description": "does this drop accept COD orders?",
+          "type": "boolean"
+        },
+        "fees": {
+          "$fees": "#definitions/dropFees"
+        },
+        "members": {
+          "description": "number of customers on this drop",
+          "type": "integer",
+          "format": "int32"
+        },
+        "order-frequency": {
+          "description": "order counts for this drop over the past year",
+          "type": "object",
+          "properties": {
+            "orders": {
+              "description": "count of orders for this route-trip-drop",
+              "type": "integer",
+              "format": "int32"
+            },
+            "cutoff": {
+              "description": "cutoff date for this route-trip",
+              "type": "string",
+              "format": "date"
+            }
+          }
+        },
+        "notes": {
+          "description": "free-form Markdown notes for any drop information that doesn't fit into an existing field",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "geo",
+        "active",
+        "exclusivity",
+        "members"
+      ]
+    },
+    "newDrop": {
+      "$ref": "drop"
+    },
+    "dropFees": {
+      "description": "additional costs for members receiving at a drop",
+      "type": "object",
+      "properties": {
+        "medium": {
+          "description": "payment medium (nothing, volunteer time, or a monetary payment)",
+          "type": "string",
+          "enum": [
+            null,
+            "volunteer",
+            "payment"
+          ]
+        },
+        "condition": {
+          "description": "fee trigger (never, only when orders are held, or for every order)",
+          "type": "string",
+          "enum": [
+            null,
+            "held",
+            "order"
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "condition"
+      ]
+    },
+    "route": {
+      "description": "an order-delivery truck route",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "cutoff-frequency": {
+          "description": "number of days between cutoffs",
+          "type": "integer",
+          "format": "int32"
+        },
+        "delivery-offset": {
+          "description": "number of days after cutoff before the first stop",
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "required": [
+        "name",
+        "cutoff-frequency",
+        "delivery-offset"
+      ]
+    },
+    "newRoute": {
+      "$ref": "route"
+    },
+    "trip": {
+      "description": "a truck delivering orders along a route",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "route": {
+          "description": "name of the followed route",
+          "type": "string"
+        },
+        "cutoff": {
+          "description": "cutoff for placing orders on this trip",
+          "type": "string",
+          "format": "date-time"
+        },
+        "delivery-start": {
+          "description": "estimated stop-time for the first stop",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "route",
+        "cutoff",
+        "delivery-start"
+      ]
+    },
+    "routeStop": {
+      "description": "a template used to create stops when a trip is verified",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "route": {
+          "description": "route name for the route-stop",
+          "type": "string"
+        },
+        "drop": {
+          "description": "drop ID for the route-stop",
+          "type": "integer",
+          "format": "int64"
+        },
+        "delivery-offset": {
+          "description": "offset from midnight on the morning of the trips's delivery start until the usual delivery time for this drop",
+          "type": "string",
+          "format": "duration"
+        }
+      },
+      "required": [
+        "id",
+        "route",
+        "drop",
+        "target-time",
+        "estimated-time"
+      ]
+    },
+    "stop": {
+      "description": "a trip stop or waypoint on a verified trip",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "trip": {
+          "description": "trip ID for the stop",
+          "type": "integer",
+          "format": "int64"
+        },
+        "drop": {
+          "description": "drop ID for the stop",
+          "type": "integer",
+          "format": "int64"
+        },
+        "target-time": {
+          "description": "planned stop time (fixed before the trip starts)",
+          "type": "string",
+          "format": "date-time"
+        },
+        "estimated-time": {
+          "description": "estimated stop time (updated after the trip starts until the stop is reached)",
+          "type": "string",
+          "format": "date-time"
+        },
+        "time": {
+          "description": "actual stop time (set after the stop is reached)",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "trip",
+        "drop",
+        "target-time",
+        "estimated-time"
+      ]
+    },
+    "packagedProduct": {
+      "description": "a particular packaged form of a product",
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "size": {
+          "description": "size of the product (e.g. 12 oz., or 6x12 oz.)",
+          "type": "string"
+        },
+        "price": {
+          "#ref": "#/definitions/price"
+        },
+        "stock": {
+          "description": "amount of stock available for purchase",
+          "type": "integer",
+          "format": "int32"
+        },
+        "favorite": {
+          "description": "if the annotate-person you associated with the request has favorited this packaged product",
+          "type": "boolean"
+        },
+        "favorites": {
+          "description": "number of people who've marked this packaged product as a favorite",
+          "type": "integer",
+          "format": "int32"
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "description": "URL for a picture of this packaged product",
+            "type": "string"
+          }
+        },
+        "tags": {
+          "description": "Mark types for this packaged product",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/packagedProductTag"
+          }
+        }
+      },
+      "required": [
+        "code",
+        "size",
+        "price",
+        "tags"
+      ]
+    },
+    "packagedProductTag": {
+      "description": "a type of packaged product or other boolean marker",
+      "type": "string",
+      "enum": [
+        "new",
+        "overstock",
+        "bargain-bin"
+      ]
+    },
+    "product": {
+      "description": "a product available for sale (independent of packaging)",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "description": "sentence-length product name",
+          "type": "string"
+        },
+        "description": {
+          "description": "long-form product description",
+          "type": "string"
+        },
+        "brand": {
+          "$ref": "#/definitions/brand"
+        },
+        "favorites": {
+          "description": "number of people who've marked this product as a favorite",
+          "type": "integer",
+          "format": "int32"
+        },
+        "packaging": {
+          "description": "packaged versions of this product",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/packagedProduct"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "size",
+        "price",
+        "packaging"
+      ]
+    },
+    "brand": {
+      "description": "a brand which may be associated with several products",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "description": "homepage for the brand",
+          "type": "string",
+          "format": "url"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "price": {
+      "description": "product price information",
+      "type": "object",
+      "properties": {
+        "dollars": {
+          "description": "price of the product in dollars",
+          "type": "number",
+          "format": "float"
+        },
+        "per-pound": {
+          "description": "whether the price is per-pound or per-unit",
+          "type": "boolean"
+        },
+        "discount": {
+          "description": "text for the discount (e.g. \"12%\", or \"$3.50\"",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dollars"
+      ]
+    },
+    "category": {
+      "description": "a category available for sale",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "description": "A phrase naming the category.  This should be understandable (but not necessarily unique) without any further context.  It must be unique for categories sharing a given parent.",
+          "type": "string"
+        },
+        "short-name": {
+          "description": "A word or two naming the category.  A shortened version of the full name that drops any words already contained in the category's ancestors' short names.  This will be used in places where the ancestor short names are in close proximity (e.g. URL slugs) to avoid having the same word many times.",
+          "type": "string"
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "description": "URL for a picture of this category",
+            "type": "string"
+          }
+        },
+        "parent": {
+          "description": "category ID for the parent category",
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "order": {
+      "description": "an order placed by a customer",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "customer": {
+          "description": "customer making the order",
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "description": "order's lifecycle stage",
+          "type": "string",
+          "enum": [
+            "cart",
+            "placed",
+            "shipped",
+            "lost"
+          ]
+        },
+        "drop": {
+          "description": "drop the order is destined for (unset for UPS orders)",
+          "type": "integer",
+          "format": "int64"
+        },
+        "trip": {
+          "description": "trip delivering the order (unset for UPS orders)",
+          "type": "integer",
+          "format": "int64"
+        },
+        "address": {
+          "description": "UPS delivery location (unset for truck orders)",
+          "$ref": "#/definitions/address"
+        }
+      },
+      "required": [
+        "id",
+        "customer",
+        "status"
+      ]
+    },
+    "orderLine": {
+      "description": "a per-product entry in an order",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "order": {
+          "description": "order that the order-line belongs to",
+          "type": "integer",
+          "format": "int64"
+        },
+        "packaged-product": {
+          "description": "packaged product code that is being ordered",
+          "type": "string"
+        },
+        "quantity-ordered": {
+          "description": "number of product instances requested",
+          "type": "integer",
+          "format": "int32"
+        },
+        "quantity-shipped": {
+          "description": "number of product instances delivered",
+          "type": "integer",
+          "format": "int32"
+        },
+        "weight": {
+          "description": "weight of the shipped products in pounds (estimated until picking time)",
+          "type": "integer",
+          "format": "float"
+        },
+        "price": {
+          "description": "per-product price (currently locked in when you place the order)",
+          "$ref": "#/definitions/price"
+        }
+      },
+      "required": [
+        "id",
+        "order",
+        "product",
+        "quantity-ordered",
+        "weight"
+      ]
+    },
+    "accountEntry": {
+      "description": "an entry in a person's acount",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "person": {
+          "description": "person associated with the account",
+          "type": "integer",
+          "format": "int64"
+        },
+        "amount": {
+          "description": "dollar value for the entry (positive for credits like customer payments, negative for debits like order charges)",
+          "type": "number",
+          "format": "float"
+        },
+        "date": {
+          "description": "when the entry was added",
+          "type": "string",
+          "format": "date"
+        },
+        "notes": {
+          "description": "a line of Markdown identifying the entry (e.g. \"charge for order 123\" or \"payed with card ending in 0123\").",
+          "type": "string"
+        },
+        "balance": {
+          "description": "account balance after this account entry",
+          "type": "number",
+          "format": "float"
+        }
+      },
+      "required": [
+        "id",
+        "person",
+        "amount",
+        "date"
+      ]
+    },
+    "creditCard": {
+      "description": "a credit card (one of our supported payment methods)",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "type": {
+          "description": "string identifying this payment model",
+          "type": "string",
+          "enum": [
+            "credit-card"
+          ]
+        },
+        "person": {
+          "description": "person associated with this credit card",
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "description": "billing name (which may differ from the associated person's name)",
+          "type": "string"
+        },
+        "address": {
+          "description": "billing address associated with this credit card",
+          "$ref": "#/definitions/address"
+        },
+        "issuer": {
+          "description": "provider network.  You can determine this from the leading digits of the card number, but we don't store those digits",
+          "type": "string"
+        },
+        "last-four": {
+          "description": "last four digits of the card number for identification",
+          "type": "string"
+        },
+        "expiration": {
+          "description": "expiration date.  We only use the month and year; the day will always be '01'.",
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "person",
+        "name",
+        "address",
+        "last-four",
+        "expiration"
+      ]
+    },
+    "newCreditCard": {
+      "description": "Azure does not store much credit card information internally (we use an external card processor), but we do need all of the information for the initial upload so we can pass it along to the external processor.",
+      "description": "a credit card (one of our supported payment methods)",
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "string identifying this payment model",
+          "type": "string",
+          "enum": [
+            "credit-card"
+          ]
+        },
+        "person": {
+          "description": "person associated with this credit card",
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "description": "billing name (which may differ from the associated person's name)",
+          "type": "string"
+        },
+        "address": {
+          "description": "billing address associated with this credit card",
+          "type": "integer",
+          "format": "int64"
+        },
+        "number": {
+          "description": "card number",
+          "type": "string"
+        },
+        "security-code": {
+          "description": "security code (also known as the verification value)",
+          "type": "string"
+        },
+        "expiration": {
+          "description": "expiration date.  We only use the month and year and ignore the day (which you should set to '01').",
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": [
+        "type",
+        "person",
+        "name",
+        "address",
+        "number",
+        "security-code",
+        "expiration"
+      ]
+    },
+    "paymentMethod": {
+      "anyOf": [
+        "creditCard"
+      ]
+    },
+    "newPaymentMethod": {
+      "anyOf": [
+        "newCreditCard"
+      ]
+    },
+    "telephone": {
+      "description": "A telephone number",
+      "type": "object",
+      "properties": {
+        "pref": {
+          "description": "Mark a preferred-use telephone number (assumed false)",
+          "type": "boolean"
+        },
+        "type": {
+          "description": "An array of properties for this number",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/telephoneType"
+          }
+        },
+        "number": {
+          "description": "E.123 telephone number",
+          "type": "string",
+          "format": "telephone"
+        }
+      },
+      "required": [
+        "type",
+        "number"
+      ]
+    },
+    "telephoneType": {
+      "description": "a property of a telephone number",
+      "type": "string",
+      "enum": [
+        "text",
+        "voice",
+        "video",
+        "fax",
+        "pager",
+        "textphone",
+        "cell",
+        "home",
+        "work"
+      ]
+    },
+    "person": {
+      "description": "a person (customer, vendor, employee, ...)",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "address": {
+      "description": "an address following the convention of http://microformats.org/wiki/h-adr and https://tools.ietf.org/html/rfc6350#section-6.3.1, with an additional \"name\" property",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "contact name for this address (e.g. \"Mr. John Q. Public, Esq.\")",
+          "type": "string"
+        },
+        "post-office-box": {
+          "type": "string"
+        },
+        "extended-address": {
+          "type": "string"
+        },
+        "street-address": {
+          "type": "string"
+        },
+        "locality":{
+          "type": "string"
+        },
+        "region": {
+          "type": "string"
+        },
+        "postal-code": {
+          "type": "string"
+        },
+        "country-name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "locality",
+        "region",
+        "country-name"
+      ]
+    },
+    "location": {
+      "description": "a named geographic coordinate with an enumerated label",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "geo": {
+          "$ref": "#/definitions/geo"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "geo"
+      ]
+    },
+    "geo": {
+      "description": "a geographical coordinate",
+      "type": "object",
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "format": "float"
+        },
+        "longitude": {
+          "type": "number",
+          "format": "float"
+        }
+      },
+      "required": [
+        "latitude",
+        "longitude"
+      ]
+    },
+    "session": {
+      "description": "session cookie information",
+      "type": "object",
+      "properties": {
+        "person": {
+          "description": "person ID for the session owner (unset for anonymous sessions)",
+          "type": "integer",
+          "format": "int64"
+        },
+        "expires": {
+          "description": "current expiration date for this session (http://tools.ietf.org/html/rfc6265#section-5.3, covering both Max-Age and Expires representations, unset if the session expires at browser-close)",
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "errorModel": {
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
