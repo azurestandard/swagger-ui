@@ -2366,6 +2366,9 @@ Resolver.prototype.resolveAllOf = function(spec, obj, depth) {
   var name;
   for(var key in obj) {
     var item = obj[key];
+    if(item === null) {
+      return
+    }
     if(item && typeof item.allOf !== 'undefined') {
       var allOf = item.allOf;
       if(Array.isArray(allOf)) {
